@@ -1,0 +1,95 @@
+<QuerySet>
+  <Query IsView="False" IsSP="False">
+    <SQL>/*SQL Workshop 101*/
+
+/*Scenario 1*/
+select patient_name, mrn, dob,payor_name, payor_group  from PATIENT_ALL where lower(payor_name) like '%aetna%pos%'
+ and lower(mailing_state) like 'penn%' and (lower(payor_group) like 'commercial' or lower(payor_group) like 'government')
+
+/*Scenario 2*/
+select 
+	    patient_name,
+	    mrn,
+	    current_age,
+	    current_pcp_location
+	from 
+	    chop_analytics.blocks_clinical.patient_all
+	where
+	   current_age &gt; 2 and current_age &lt;= 10 -- age criteria
+	   and current_pcp_location is not null -- this means you have a CHOP PCP
+	;
+	
+/*Scenario 3*/
+select csn,encounter_date,provider_name,department_id from ENCOUNTER_PRIMARY_CARE
+where (department_id = '50601012' or department_id ='69318012' or department_id ='101018001' or department_id = '51606012' or department_id = '98109512')
+and encounter_date &gt;= '2021-01-01' and encounter_date &lt; '2022-01-01' 
+
+/*Scenario 4*/
+select mrn, full_name, cohort_date, patient_status from ASP_INPATIENT_LOCATION
+where lower(patient_status) like 'discharged to home or self care (routine discharge)'
+and cohort_date = '2022-05-09'
+
+/*Scenario 5*/
+select patient_name, mrn, sex,current_age, preferred_language,preferred_name
+from PATIENT_ALL
+where lower(preferred_language) like '%english%' and preferred_language is not null
+
+/*Scenario 6*/
+select patient_name, dob, mrn, encounter_date,mychop_scheduled_ind,appointment_date,provider_name, well_visit_ind from ENCOUNTER_ALL
+where mychop_scheduled_ind = '1' and well_visit_ind = '1' and encounter_date &gt;='2022-01-01' and encounter_date &lt;= '2022-12-31'
+
+/*Sceanrio 7*/
+
+select
+	    patient_name,
+	    mrn,
+	    dob,
+	    encounter_date,
+	    appointment_date,
+	    visit_type,
+	    department_name,
+	    specialty_name,
+	    provider_name,
+	    case when lower(visit_type) like '%fol%up%' then 1 else 0 end as followup_visit_ind
+	from 
+	    chop_analytics.blocks_clinical.encounter_specialty_care
+	where
+	    ((provider_name = 'Zackai, Elaine' and lower(visit_type) like '%22q%')
+	    or (provider_name = 'Izumi, Kosuke' and department_id = 101012166)) --'BGR GENETICS'
+	    and encounter_date &gt;= (current_date - 1) (** alt date to my code)
+	;
+
+/*Scenario 8*/
+
+select 
+	    patient_name,
+	    mrn,
+	    dob,
+	    encounter_date,
+	    ed_arrival_date,
+	    ed_discharge_date,
+	    age_years,
+	    payor_group,
+	    primary_reason_for_visit_name, 
+	    revisit_72_hour_ind, 
+	    case 
+	        when age_years &lt; 2 then '0 to &lt;2'
+	        when age_years &gt;= 2 and age_years &lt;5 then '2 to &lt;5'
+	        when age_years &gt;= 5 and age_years &lt;12 then '5 to &lt;12'
+	        when age_years &gt;= 12 and age_years &lt;18 then '12 to &lt;18'
+	        when age_years &gt;= 18 then '18+'
+	        end as age_groups
+	from 
+	    chop_analytics.blocks_clinical.encounter_ed
+	where 
+	    initial_ed_department_center_id = 101 -- KOPH ED center
+	;
+
+/*Scenario 9*/
+select patient_name, mrn, encounter_date,diagnosis_name from DIAGNOSIS_ENCOUNTER_ALL
+
+where ICD10_CODE = 'E10.65' and PROBLEM_LIST_IND ='1' and encounter_date &gt;= '2021-10-01' and encounter_date &lt;= '2021-10-31'
+</SQL>
+    <Name>Tab 1</Name>
+  </Query>
+</QuerySet>
